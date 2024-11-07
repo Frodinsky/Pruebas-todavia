@@ -1,5 +1,8 @@
 import flet as ft
+from flet_core.alignment import center
+
 from eliminar_archivos_duplicados import find_duplicates, delete_file
+from agrupar_archivos import organize_folder
 
 def main(page: ft.Page):
     # Configuracion ventana
@@ -23,6 +26,7 @@ def main(page: ft.Page):
     #Variables de estado siempre antes del change_view
     state = {
         "current_duplicates": [],
+        "current_view": "duplicates"
     }
 
     select_dir_text = ft.Text("No has seleccionado ninguna carpeta",
@@ -45,25 +49,53 @@ def main(page: ft.Page):
         visible=False,
         on_click=lambda e: delete_all_duplicates()
     )
+
+    organize_dir_text = ft.Text(
+        "No se ha seleccionado ninguna carpeta",
+        size=14,
+        color=ft.colors.BLUE_200,
+    )
+
+    organize_result_text = ft.Text(size=14, weight=ft.FontWeight.BOLD)
+
     #terminan las variables de estado
 
     def change_view(e):
         selected = e.control.selected_index
         if selected == 0:
+            state["current_view"] = "duplicates"
             content_area.content = duplicate_file_view
         elif selected == 1:
-            content_area.content = ft.Text("1")
+            state["current_view"] = "organize"
+            content_area.content = organize_files_views
         elif selected == 2:
+            state["current_view"] = "pronto"
             content_area.content = ft.Text("2")
         content_area.update()
 
 
     def handle_folder_picker(e: ft.FilePickerResultEvent):
         if e.path:
+            if state["current_view"] == "duplicates":
+                select_dir_text.value = f"Carpeta seleccionada: {e.path}"
+                select_dir_text.update()
+                scan_directory(e.path)
+            elif state["current_view"] == "organize":
+                organize_dir_text.value = f"Carpeta seleccionada: {e.path}"
+                organize_dir_text.update()
+                organize_directory(e.path)
 
-            select_dir_text.value = f"Carpeta seleccionada: {e.path}"
-            select_dir_text.update()
-            scan_directory(e.path)
+    def organize_directory(directory):
+        try:
+            organize_folder(directory)
+            organize_result_text.value = "Archivos organizados exitosamente"
+            organize_result_text.color = ft.colors.GREEN_400
+
+        except Exception as e:
+            organize_result_text.value = f"Error al organizar los archivos {str(e)}"
+            organize_result_text.color = ft.colors.RED_400
+
+        organize_result_text.update()
 
     def scan_directory(directory):
         duplicate_list.controls.clear()
@@ -186,6 +218,57 @@ def main(page: ft.Page):
                 margin=ft.margin.only(top=10),
                 bgcolor=ft.colors.GREY_800,
                 expand=True,
+
+            )
+        ]),
+        padding=30,
+        expand=True
+    )
+
+    # Vista de organizar archivos
+    organize_files_views = ft.Container(
+        content=ft.Column([
+            ft.Container(
+                content=ft.Text("Organizar archivos en carpetas",
+                                size=28,
+                                weight=ft.FontWeight.BOLD,
+                                color=ft.colors.BLUE_200,
+                                ),
+                margin=ft.margin.only(bottom=20)
+            ),
+            ft.ElevatedButton(
+                "Seleccionar carpeta",
+                icon=ft.icons.FOLDER_OPEN,
+                color=ft.colors.WHITE,
+                bgcolor=ft.colors.BLUE_900,
+                on_click=lambda _: folder_picker.get_directory_path()
+            ),
+            ft.Container(
+                content=organize_result_text,
+                margin=ft.margin.only(top=10, bottom=10)
+            ),
+            organize_dir_text,
+            ft.Container(
+                content=ft.Column([
+                    ft.Text(
+                        "Los archivos seran organizados en las siguientes carpetas",
+                        size=20,
+                        color=ft.colors.BLUE_200,
+
+                    ),
+                    ft.Text("Imágenes: .jpg, .jpeg, .png, .gif, .bmp, .tiff, .webp", size=18),
+                    ft.Text("Videos: .mp4, .avi, .mov, .mkv, .wmv, .flv", size=18),
+                    ft.Text("Documentos: .pdf, .docx, .pptx, .txt, .rtf", size=18),
+                    ft.Text("Datasets: .csv, .json, .xlsx, .tsv, .xml, .hdf5, .sav", size=18),
+                    ft.Text("Comprimidos: .zip, .rar, .tar, .gz, .7z, .bz2", size=18),
+                    ft.Text("Audio: .mp3, .wav, .aac, .flac, .ogg, .m4a", size=18),
+                    ft.Text("Imágenes Vectoriales: .svg, .ai, .eps, .cdr", size=18),
+                ]),
+                border=ft.border.all(2, ft.colors.BLUE_400),
+                border_radius=11,
+                padding=22,
+                margin=ft.margin.only(top=10),
+                bgcolor=ft.colors.GREY_800,
 
             )
         ]),
