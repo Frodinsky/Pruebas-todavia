@@ -45,7 +45,6 @@ def main(page: ft.Page):
         visible=False,
         on_click=lambda e: delete_all_duplicates()
     )
-
     #terminan las variables de estado
 
     def change_view(e):
@@ -56,8 +55,6 @@ def main(page: ft.Page):
             content_area.content = ft.Text("1")
         elif selected == 2:
             content_area.content = ft.Text("2")
-
-
         content_area.update()
 
 
@@ -150,7 +147,6 @@ def main(page: ft.Page):
         result_text.update()
         delete_all_button.update()
 
-
     # Configurar el selector de carpetas
     folder_picker = ft.FilePicker(on_result=handle_folder_picker)
     page.overlay.append(folder_picker)
@@ -196,8 +192,6 @@ def main(page: ft.Page):
         padding=30,
         expand=True
     )
-
-
 
     content_area = ft.Container(
         content=duplicate_file_view,
