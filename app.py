@@ -1,8 +1,8 @@
 import flet as ft
-from flet_core.alignment import center
-
 from eliminar_archivos_duplicados import find_duplicates, delete_file
 from agrupar_archivos import organize_folder
+from  remover_fondo import process_images
+
 
 def main(page: ft.Page):
     # Configuracion ventana
@@ -58,6 +58,8 @@ def main(page: ft.Page):
 
     organize_result_text = ft.Text(size=14, weight=ft.FontWeight.BOLD)
 
+    removebg_result_text = ft.Text(size=14, weight=ft.FontWeight.BOLD)
+
     #terminan las variables de estado
 
     def change_view(e):
@@ -69,8 +71,11 @@ def main(page: ft.Page):
             state["current_view"] = "organize"
             content_area.content = organize_files_views
         elif selected == 2:
+            state["current_view"] = "removebg"
+            content_area.content = backgroundremove_file_view
+        elif selected == 3:
             state["current_view"] = "pronto"
-            content_area.content = ft.Text("2")
+            content_area.content = ft.Text("5")
         content_area.update()
 
 
@@ -84,6 +89,22 @@ def main(page: ft.Page):
                 organize_dir_text.value = f"Carpeta seleccionada: {e.path}"
                 organize_dir_text.update()
                 organize_directory(e.path)
+            elif state["current_view"] == "removebg":
+                organize_dir_text.value = f"Carpeta seleccionada: {e.path}"
+                organize_dir_text.update()
+                remove_directory(e.path)
+
+    def remove_directory(directory):
+        try:
+            process_images(directory)
+            removebg_result_text.value = "Archivos organizados exitosamente"
+            removebg_result_text.color = ft.colors.GREEN_400
+
+        except Exception as e:
+            removebg_result_text.value = f"Error al eliminar fondo los archivos son: {str(e)}"
+            removebg_result_text.color = ft.colors.RED_400
+
+        removebg_result_text.update()
 
     def organize_directory(directory):
         try:
@@ -276,6 +297,51 @@ def main(page: ft.Page):
         expand=True
     )
 
+
+    # Vista de Quitar fondo imagenes
+    backgroundremove_file_view = ft.Container(
+        content=ft.Column([
+            ft.Container(
+                content=ft.Text("Remover fondo a imagenes",
+                                size=28,
+                                weight=ft.FontWeight.BOLD,
+                                color=ft.colors.BLUE_200,
+                                ),
+                margin=ft.margin.only(bottom=20)
+            ),
+            ft.Row([
+                ft.ElevatedButton(
+                    "Seleccionar carpeta",
+                    icon=ft.icons.FOLDER_OPEN,
+                    color=ft.colors.WHITE,
+                    bgcolor=ft.colors.BLUE_900,
+                    on_click=lambda _: folder_picker.get_directory_path()
+                ),
+                #delete_all_button,
+            ]),
+            ft.Container(
+                content=removebg_result_text,
+                margin=ft.margin.only(top=10, bottom=10)
+            ),
+            #result_text,
+
+            ft.Container(
+                content=duplicate_list,
+                border=ft.border.all(2, ft.colors.BLUE_400),
+                border_radius=10,
+                padding=20,
+                margin=ft.margin.only(top=10),
+                bgcolor=ft.colors.GREY_800,
+                expand=True,
+
+            )
+        ]),
+        padding=30,
+        expand=True
+    )
+
+
+
     content_area = ft.Container(
         content=duplicate_file_view,
         expand=True,
@@ -299,6 +365,11 @@ def main(page: ft.Page):
                 icon=ft.icons.FOLDER_COPY_OUTLINED,
                 selected_icon=ft.icons.FOLDER_COPY,
                 label="Organizar", ),
+            ft.NavigationRailDestination(
+                icon=ft.icons.IMAGE_OUTLINED,
+                selected_icon=ft.icons.IMAGE_ROUNDED,
+                label="Remover Fondo"
+            ),
             ft.NavigationRailDestination(
                 icon=ft.icons.ADD_CIRCLE_OUTLINE,
                 selected_icon=ft.icons.ADD_CIRCLE,
