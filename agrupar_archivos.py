@@ -21,5 +21,5 @@ def organize_folder(folder):
                     target_folder = os.path.join(folder, folder_name)
                     os.makedirs(target_folder, exist_ok=True)
                     shutil.move(file_path, os.path.join(target_folder, filename))
-                    #print(f"Archivo {filename} movido a {folder_name}")
+
 
