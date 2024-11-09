@@ -1,5 +1,8 @@
 import flet as ft
+<<<<<<< HEAD
 from flet_core.icons import ALL_INCLUSIVE
+=======
+>>>>>>> 106d15988e8665acb4c9c57ce6299a2eacfb55e4
 from eliminar_archivos_duplicados import find_duplicates, delete_file
 from agrupar_archivos import organize_folder
 from  remover_fondo import process_images
@@ -27,9 +30,13 @@ def main(page: ft.Page):
     #Variables de estado siempre antes del change_view
     state = {
         "current_duplicates": [],
+<<<<<<< HEAD
         "processed_images":[],
         "current_view": "duplicates"
 
+=======
+        "current_view": "duplicates"
+>>>>>>> 106d15988e8665acb4c9c57ce6299a2eacfb55e4
     }
 
     select_dir_text = ft.Text("No has seleccionado ninguna carpeta",
@@ -43,11 +50,14 @@ def main(page: ft.Page):
         spacing=10,
         height=200,
     )
+<<<<<<< HEAD
     processed_images_list = ft.ListView( #acuerdate de cambiar luego esto por los demas duplicate_list en el page
         expand=1,
         spacing=10,
         height=200,
     )
+=======
+>>>>>>> 106d15988e8665acb4c9c57ce6299a2eacfb55e4
 
     delete_all_button = ft.ElevatedButton(
         "Eliminar todos los elementos duplicados",
@@ -63,18 +73,24 @@ def main(page: ft.Page):
         size=14,
         color=ft.colors.BLUE_200,
     )
+<<<<<<< HEAD
     removeg_dir_text = ft.Text(
         "No se ha seleccionado ninguna carpeta",
         size=14,
         color=ft.colors.BLUE_200,
     )
+=======
+>>>>>>> 106d15988e8665acb4c9c57ce6299a2eacfb55e4
 
     organize_result_text = ft.Text(size=14, weight=ft.FontWeight.BOLD)
 
     removebg_result_text = ft.Text(size=14, weight=ft.FontWeight.BOLD)
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 106d15988e8665acb4c9c57ce6299a2eacfb55e4
     #terminan las variables de estado
 
     def change_view(e):
@@ -105,14 +121,23 @@ def main(page: ft.Page):
                 organize_dir_text.update()
                 organize_directory(e.path)
             elif state["current_view"] == "removebg":
+<<<<<<< HEAD
                 removeg_dir_text.value = f"Carpeta seleccionada: {e.path}"
                 removeg_dir_text.update()
+=======
+                organize_dir_text.value = f"Carpeta seleccionada: {e.path}"
+                organize_dir_text.update()
+>>>>>>> 106d15988e8665acb4c9c57ce6299a2eacfb55e4
                 remove_directory(e.path)
 
     def remove_directory(directory):
         try:
             process_images(directory)
+<<<<<<< HEAD
             removebg_result_text.value = "Imagenes sin fondo, exitosamente"
+=======
+            removebg_result_text.value = "Archivos organizados exitosamente"
+>>>>>>> 106d15988e8665acb4c9c57ce6299a2eacfb55e4
             removebg_result_text.color = ft.colors.GREEN_400
 
         except Exception as e:
@@ -338,6 +363,7 @@ def main(page: ft.Page):
                 content=removebg_result_text,
                 margin=ft.margin.only(top=10, bottom=10)
             ),
+<<<<<<< HEAD
             removeg_dir_text,
 
             ft.Container(
@@ -351,12 +377,22 @@ def main(page: ft.Page):
                     ft.Text("Imágenes: \n .jpg, .jpeg, .png", size=18),
 
                 ]),
+=======
+            #result_text,
+
+            ft.Container(
+                content=duplicate_list,
+>>>>>>> 106d15988e8665acb4c9c57ce6299a2eacfb55e4
                 border=ft.border.all(2, ft.colors.BLUE_400),
                 border_radius=10,
                 padding=20,
                 margin=ft.margin.only(top=10),
                 bgcolor=ft.colors.GREY_800,
+<<<<<<< HEAD
                 expand=ALL_INCLUSIVE,
+=======
+                expand=True,
+>>>>>>> 106d15988e8665acb4c9c57ce6299a2eacfb55e4
 
             )
         ]),
