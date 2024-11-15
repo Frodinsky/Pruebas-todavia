@@ -1,7 +1,9 @@
 import flet as ft
+import os
 from eliminar_archivos_duplicados import find_duplicates, delete_file
 from agrupar_archivos import organize_folder
 from  remover_fondo import process_images
+
 
 
 def main(page: ft.Page):
@@ -28,9 +30,9 @@ def main(page: ft.Page):
         "current_duplicates": [],
         "current_view": "duplicates"
     }
-    #IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png'}
+    IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png'}
 
-    #Inicio la variables de eliminar archivos duplicados
+    #Inicio de las variables de eliminar archivos duplicados
     select_dir_text = ft.Text("No has seleccionado ninguna carpeta",
                               size=14,
                               color=ft.colors.BLUE_200,
@@ -64,6 +66,20 @@ def main(page: ft.Page):
 
 
     removebg_result_text = ft.Text(size=14, weight=ft.FontWeight.BOLD)
+
+    image_list = ft.ListView(
+        expand=1,
+        spacing=10,
+        height=200,
+    )
+    remove_all_button = ft.ElevatedButton(
+        "Eliminar Fondo de todas las imagenes",
+        color=ft.colors.WHITE,
+        bgcolor=ft.colors.RED_900,
+        icon=ft.icons.DELETE_SWEEP,
+        visible=False,
+        on_click=lambda e: delete_all_duplicates()
+    )
 
     #terminan las variables de estado
 
@@ -99,18 +115,84 @@ def main(page: ft.Page):
                 removebg_result_text.update()
                 remove_directory(e.path)
 
+#Se implementa funcion para ver todas las imagenes en la vista
     def remove_directory(directory):
         try:
-            process_images(directory)
-            removebg_result_text.value = "Se le quito el fondo a las imagenes exitosamente"
-            removebg_result_text.color = ft.colors.GREEN_400
+            # Limpiar la lista de imágenes previas
+            image_list.controls.clear()
+
+            # Buscar imágenes en el directorio
+            image_files = []
+            for root, dirs, files in os.walk(directory):
+                for file in files:
+                    img_path = os.path.join(root, file)
+
+                    # Verificar si la ruta corresponde a un archivo y si es una imagen
+                    if os.path.isfile(img_path) and any(file.lower().endswith(ext) for ext in IMAGE_EXTENSIONS):
+                        image_files.append(img_path)
+
+            # Si no se encuentran imágenes
+            if not image_files:
+                removebg_result_text.value = "No se encontraron imágenes en el directorio."
+                removebg_result_text.color = ft.colors.RED_400
+                removebg_result_text.update()
+                return
+
+            # Si se encuentran imágenes, mostrar la lista en la interfaz
+            removebg_result_text.value = f"Se encontraron {len(image_files)} imágenes."
+            removebg_result_text.color = ft.colors.ORANGE_400
+            removebg_result_text.update()
+
+            for img_path in image_files:
+                # Mostrar depuración de las rutas de imagen que estamos procesando
+                print(f"Procesando archivo: {img_path}")
+
+                # Crear una fila para cada imagen con su nombre y un botón para eliminar el fondo
+                img_row = ft.Row([
+                    ft.Text(f"Imagen: {img_path}",
+                            size=15,
+                            expand=True,
+                            color=ft.colors.BLUE_200
+                            ),
+                    ft.ElevatedButton(
+                        "Eliminar Fondo",
+                        color=ft.colors.WHITE,
+                        bgcolor=ft.colors.RED_900,
+                        on_click=lambda es, path=img_path: process_and_remove_bg(path)  # Eliminar fondo
+                    )
+                ])
+                image_list.controls.append(img_row)
+
+            # Actualizar la interfaz con la lista de imágenes
+            image_list.update()
 
         except Exception as e:
-            removebg_result_text.value = f"Error al eliminar fondo los archivos son: {str(e)}"
+            removebg_result_text.value = f"Error al procesar las imágenes: {str(e)}"
             removebg_result_text.color = ft.colors.RED_400
+            removebg_result_text.update()
 
-        removebg_result_text.update()
 
+    def process_and_remove_bg(img_path):
+        try:
+            # Asegurarse de que la ruta corresponde a un archivo, no un directorio
+            if not os.path.isfile(img_path):
+                raise ValueError(f"La ruta no es un archivo válido: {img_path}")
+
+            # Aquí aplicas la lógica para eliminar el fondo de la imagen
+            process_images(img_path)  # Esta es la función que procesará la imagen
+
+            # Mostrar mensaje de éxito
+            removebg_result_text.value = f"Fondo eliminado exitosamente de {img_path}"
+            removebg_result_text.color = ft.colors.GREEN_400
+            removebg_result_text.update()
+
+        except Exception as e:
+            # Si ocurre un error con alguna imagen, mostrar mensaje de error
+            removebg_result_text.value = f"Error al eliminar el fondo de {img_path}: {str(e)}"
+            removebg_result_text.color = ft.colors.RED_400
+            removebg_result_text.update()
+
+    #demas funciones estan bien
     def organize_directory(directory):
         try:
             organize_folder(directory)
@@ -331,7 +413,7 @@ def main(page: ft.Page):
             removebg_result_text,
 
             ft.Container(
-                content=duplicate_list,
+                content=image_list,
                 border=ft.border.all(2, ft.colors.BLUE_400),
                 border_radius=10,
                 padding=20,
